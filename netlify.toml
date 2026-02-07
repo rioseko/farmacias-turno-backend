@@ -1,6 +1,6 @@
 [build]
-  command = "npm run build"
-  publish = "dist/farmacias-turno/browser"
+  command = "echo 'No build command needed'"
+  publish = "public"
 
 [functions]
   directory = "netlify/functions"
