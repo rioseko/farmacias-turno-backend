@@ -10,10 +10,12 @@
     "dev": "nodemon src/index.js"
   },
   "dependencies": {
+    "@sparticuz/chromium": "^143.0.4",
     "axios": "^1.7.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "puppeteer-core": "^24.37.2",
     "serverless-http": "^4.0.0"
   },
   "devDependencies": {
