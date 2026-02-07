@@ -4,9 +4,15 @@
 
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = ["express", "serverless-http", "cors", "axios", "dotenv"]
 
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/api/:splat"
   status = 200
+
+[[headers]]
+  for = "/*"
+    [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "*"
+    Access-Control-Allow-Methods = "*"
