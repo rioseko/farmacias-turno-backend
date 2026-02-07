@@ -42,12 +42,19 @@ router.get('/farmacias', async (req, res) => {
       timeout: 15000,
       headers: {
         'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        Accept: 'application/json, text/plain, */*',
-        'Accept-Language': 'es-ES,es;q=0.9',
-        Referer: 'https://midas.minsal.cl/',
-        Origin: 'https://midas.minsal.cl',
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        Accept:
+          'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'Accept-Language': 'es-CL,es;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Accept-Encoding': 'gzip, deflate, br',
         Connection: 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
+        Pragma: 'no-cache',
+        'Cache-Control': 'no-cache',
       },
     })
 
@@ -77,11 +84,18 @@ router.get('/farmacias', async (req, res) => {
     res.json({ ok: true, total: mapped.length, comuna: comunaQuery, data: mapped })
   } catch (err) {
     const status = err.response?.status
+    const dataError = err.response?.data
+    // Si es un string (HTML), tomar los primeros 200 caracteres para depuración
+    const msg =
+      typeof dataError === 'string'
+        ? dataError.substring(0, 200).replace(/\n/g, ' ')
+        : ''
+
     res.status(502).json({
       ok: false,
       error:
         status && status >= 400
-          ? `Error del proveedor (${status})`
+          ? `Error del proveedor (${status}): ${msg}`
           : 'Error al consultar proveedor',
     })
   }
