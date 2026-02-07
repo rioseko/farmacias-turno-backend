@@ -1,5 +1,5 @@
 [build]
-  command = "npm install"
+  command = "npm install && mkdir -p dist"
   publish = "dist"
 
 [functions]
