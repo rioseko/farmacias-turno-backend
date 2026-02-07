@@ -98,50 +98,36 @@ router.get('/farmacias', async (req, res) => {
     // Si la API retorna JSON directamente, el contenido estará en el body dentro de un <pre> o como texto raw
     // Pero si hay Cloudflare challenge, puppeteer esperará a que pase.
     await page.goto(MINSAL_URL, {
-      waitUntil: 'networkidle0', // Esperar a que termine la carga de red (útil para pasar challenges)
-      timeout: 15000,
+      waitUntil: 'networkidle0', // Esperar a que termine la carga de red
+      timeout: 30000, // 30 segundos timeout
     })
 
-    // Extraer el contenido del body (el JSON)
-    // Cloudflare a veces envuelve el JSON en HTML <pre>
+    // Extraer el contenido de la página (el JSON)
+    // A veces viene dentro de un tag <pre> (chrome default view for json) o body puro
     const content = await page.evaluate(() => {
-      return document.querySelector('body').innerText
+      const pre = document.querySelector('pre')
+      return pre ? pre.innerText : document.body.innerText
     })
 
     let data = []
     try {
       data = JSON.parse(content)
     } catch (e) {
-      // Si falla el parseo, puede ser que seguimos en la página de error o el formato es incorrecto
-      throw new Error(`No se pudo parsear JSON. Contenido recibido: ${content.substring(0, 200)}`)
+      console.error('Error parseando JSON de MINSAL:', e)
+      console.log('Contenido recibido:', content.substring(0, 200))
+      throw new Error('La respuesta de MINSAL no es un JSON válido. Posible bloqueo o error del servicio.')
     }
 
-    if (!Array.isArray(data)) {
-      throw new Error('Formato inesperado de respuesta del proveedor (no es array)')
-    }
+    // Retornamos los datos crudos tal cual vienen de MINSAL
+    // El frontend se encarga de filtrar por comuna y normalizar
+    res.json(data)
 
-    const filtered = data.filter(
-      (item) => normalizeComuna(item?.comuna_nombre) === comunaQuery
-    )
-
-    const mapped = filtered.map((item) => ({
-      nombre: item?.local_nombre ?? '',
-      direccion: item?.local_direccion ?? '',
-      telefono: item?.local_telefono ?? '',
-      horario: buildHorario(
-        item?.funcionamiento_hora_apertura,
-        item?.funcionamiento_hora_cierre
-      ),
-      lat: item?.local_lat ? Number(item.local_lat) : null,
-      lng: item?.local_lng ? Number(item.local_lng) : null,
-    }))
-
-    res.json({ ok: true, total: mapped.length, comuna: comunaQuery, data: mapped })
-  } catch (err) {
-    console.error('Puppeteer Error:', err)
-    res.status(502).json({
+  } catch (error) {
+    console.error('Error en API Proxy:', error)
+    res.status(500).json({
       ok: false,
-      error: `Error al consultar proveedor con navegador: ${err.message}`,
+      error: `Error al consultar proveedor con navegador: ${error.message}`,
+      stack: error.stack
     })
   } finally {
     if (browser) {
@@ -150,12 +136,5 @@ router.get('/farmacias', async (req, res) => {
   }
 })
 
-router.get('/health', (_req, res) => {
-  res.json({ ok: true, timestamp: new Date().toISOString() })
-})
-
-app.use('/api', router)
 app.use('/.netlify/functions/api', router)
-app.use('/', router)
-
 export const handler = serverless(app)
