@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import axios from 'axios'
 import dotenv from 'dotenv'
+import serverless from 'serverless-http'
 
 dotenv.config()
 
@@ -89,6 +90,10 @@ app.get('/health', (_req, res) => {
   res.json({ ok: true })
 })
 
-app.listen(PORT, () => {
-  // running
-})
+export const handler = serverless(app)
+
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Backend running on port ${PORT}`)
+  })
+}
