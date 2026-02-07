@@ -72,6 +72,12 @@ router.get('/farmacias', async (req, res) => {
       executablePath = await chromium.executablePath()
     }
 
+    if (!executablePath) {
+      throw new Error(
+        `No se pudo determinar el path del ejecutable de Chromium. isLocal: ${isLocal}`
+      )
+    }
+
     // Lanzar navegador
     browser = await puppeteer.launch({
       args: isLocal ? ['--no-sandbox'] : chromium.args,
