@@ -41,8 +41,13 @@ router.get('/farmacias', async (req, res) => {
     const { data } = await axios.get(MINSAL_URL, {
       timeout: 15000,
       headers: {
-        'User-Agent': 'farmacias-turno-proxy/1.0',
-        Accept: 'application/json',
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        Accept: 'application/json, text/plain, */*',
+        'Accept-Language': 'es-ES,es;q=0.9',
+        Referer: 'https://midas.minsal.cl/',
+        Origin: 'https://midas.minsal.cl',
+        Connection: 'keep-alive',
       },
     })
 
