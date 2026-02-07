@@ -6,6 +6,8 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 const app = express()
+const router = express.Router()
+
 app.use(cors())
 app.set('etag', false)
 app.use((_req, res, next) => {
@@ -32,7 +34,7 @@ function buildHorario(apertura, cierre) {
   return ''
 }
 
-app.get('/api/farmacias', async (req, res) => {
+router.get('/farmacias', async (req, res) => {
   const comunaQuery = normalizeComuna(req.query.comuna || 'temuco')
 
   try {
@@ -79,6 +81,9 @@ app.get('/api/farmacias', async (req, res) => {
     })
   }
 })
+
+app.use('/api', router)
+app.use('/.netlify/functions/api', router)
 
 app.get('/health', (_req, res) => {
   res.json({ ok: true })
